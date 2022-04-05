@@ -1,0 +1,6 @@
+torch>=1.8
+torchvision>=0.9.1
+kornia
+imageio
+imageio-ffmpeg
+configargparse
