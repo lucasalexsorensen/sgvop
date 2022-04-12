@@ -180,18 +180,23 @@ def get_config_parser():
         "--i_img", type=int, default=500, help="frequency of tensorboard image logging"
     )
     parser.add_argument(
-        "--i_weights", type=int, default=10000, help="frequency of weight ckpt saving"
+        "--i_weights", type=int, default=1000, help="frequency of weight ckpt saving"
     )
     parser.add_argument("--i_testset", type=int, default=1000, help="frequency of testset saving")
     parser.add_argument(
-        "--i_video", type=int, default=5000, help="frequency of render_poses video saving"
+        "--i_video", type=int, default=1000, help="frequency of render_poses video saving"
     )
 
+    # hashnerf options
     parser.add_argument(
-        "--finest_res", type=int, default=512, help="finest resolultion for hashed embedding"
+        "--finest_res", type=int, default=512, help="finest resolution for hashed embedding"
     )
     parser.add_argument("--log2_hashmap_size", type=int, default=19, help="log2 of hashmap size")
-    parser.add_argument("--sparse-loss-weight", type=float, default=1e-10, help="learning rate")
-    parser.add_argument("--tv-loss-weight", type=float, default=1e-6, help="learning rate")
+    parser.add_argument(
+        "--sparse-loss-weight", type=float, default=1e-10, help="sparsity loss weight"
+    )
+    parser.add_argument(
+        "--tv-loss-weight", type=float, default=1e-6, help="total variation loss weight"
+    )
 
     return parser

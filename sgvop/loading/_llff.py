@@ -342,8 +342,8 @@ def load_llff_data(
     else:
 
         c2w = _poses_avg(poses)
-        print("recentered", c2w.shape)
-        print(c2w[:3, :4])
+        # print("recentered", c2w.shape)
+        # print(c2w[:3, :4])
 
         ## Get spiral
         # Get average pose
@@ -379,18 +379,17 @@ def load_llff_data(
     render_poses = np.array(render_poses).astype(np.float32)
 
     c2w = _poses_avg(poses)
-    print("Data:")
-    print(poses.shape, images.shape, bds.shape)
+    # print("Data:")
+    # print(poses.shape, images.shape, bds.shape)
 
     dists = np.sum(np.square(c2w[:3, 3] - poses[:, :3, 3]), -1)
     i_test = np.argmin(dists)
-    print("HOLDOUT view is", i_test)
+    # print("HOLDOUT view is", i_test)
 
     images = images.astype(np.float32)
     masks = masks.astype(np.float32)
     poses = poses.astype(np.float32)
 
     bounding_box = _get_bbox3d_for_llff(poses[:, :3, :4], poses[0, :3, -1], near=0.0, far=1.0)
-
 
     return images, masks, poses, bds, render_poses, i_test, bounding_box

@@ -41,7 +41,7 @@ def train():
             [i for i in np.arange(int(images.shape[0])) if (i not in i_test and i not in i_val)]
         )
 
-        print("DEFINING BOUNDS")
+        # print("DEFINING BOUNDS")
         if args.no_ndc:
             near = np.ndarray.min(bds) * 0.9
             far = np.ndarray.max(bds) * 1.0
@@ -49,7 +49,7 @@ def train():
         else:
             near = 0.0
             far = 1.0
-        print("NEAR FAR", near, far)
+        # print("NEAR FAR", near, far)
 
     elif args.dataset_type == "blender":
         images, poses, render_poses, hwf, i_split, bounding_box = load_blender_data(
@@ -92,7 +92,7 @@ def train():
     render_poses = torch.Tensor(render_poses).to(device)
     poses = torch.Tensor(poses).to(device)
 
-    N_iters = 50000 + 1
+    N_iters = 10000 + 1
     # print("Begin")
     # print("TRAIN views are", i_train)
     # print("TEST views are", i_test)
