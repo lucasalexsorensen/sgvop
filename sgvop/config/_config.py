@@ -177,14 +177,14 @@ def get_config_parser():
         "--i_print", type=int, default=100, help="frequency of console printout and metric loggin"
     )
     parser.add_argument(
-        "--i_img", type=int, default=500, help="frequency of tensorboard image logging"
+        "--i_img", type=int, default=5000, help="frequency of tensorboard image logging"
     )
     parser.add_argument(
-        "--i_weights", type=int, default=1000, help="frequency of weight ckpt saving"
+        "--i_weights", type=int, default=5000, help="frequency of weight ckpt saving"
     )
     parser.add_argument("--i_testset", type=int, default=1000, help="frequency of testset saving")
     parser.add_argument(
-        "--i_video", type=int, default=1000, help="frequency of render_poses video saving"
+        "--i_video", type=int, default=5000, help="frequency of render_poses video saving"
     )
 
     # hashnerf options
