@@ -21,13 +21,13 @@ def train():
 
     # load dataset
     if args.dataset_type == "llff":
-        images, poses, bds, render_poses, i_test, bounding_box = load_llff_data(
+        images, masks, poses, bds, render_poses, i_test, bounding_box = load_llff_data(
             args.datadir, args.factor, recenter=True, bd_factor=0.75, spherify=args.spherify
         )
         hwf = poses[0, :3, -1]
         poses = poses[:, :3, :4]
         args.bounding_box = bounding_box
-        print("Loaded llff", images.shape, render_poses.shape, hwf, args.datadir)
+        print("Loaded llff", images.shape, masks.shape, render_poses.shape, hwf, args.datadir)
 
         if not isinstance(i_test, list):
             i_test = [i_test]
@@ -93,10 +93,10 @@ def train():
     poses = torch.Tensor(poses).to(device)
 
     N_iters = 50000 + 1
-    print("Begin")
-    print("TRAIN views are", i_train)
-    print("TEST views are", i_test)
-    print("VAL views are", i_val)
+    # print("Begin")
+    # print("TRAIN views are", i_train)
+    # print("TEST views are", i_test)
+    # print("VAL views are", i_val)
 
     loss_list = []
     psnr_list = []
@@ -108,40 +108,42 @@ def train():
         img_i = np.random.choice(i_train)
         target = images[img_i]
         target = torch.Tensor(target).to(device)
+        target_mask = torch.Tensor(masks[img_i]).to(device)
         pose = poses[img_i, :3, :4]
 
-        if args.N_rand is not None:
-            rays_o, rays_d = Utils.get_rays(H, W, K, torch.Tensor(pose))  # (H, W, 3), (H, W, 3)
+        rays_o, rays_d = Utils.get_rays(H, W, K, torch.Tensor(pose))  # (H, W, 3), (H, W, 3)
 
-            if i < args.precrop_iters:
-                dH = int(H // 2 * args.precrop_frac)
-                dW = int(W // 2 * args.precrop_frac)
-                coords = torch.stack(
-                    torch.meshgrid(
-                        torch.linspace(H // 2 - dH, H // 2 + dH - 1, 2 * dH),
-                        torch.linspace(W // 2 - dW, W // 2 + dW - 1, 2 * dW),
-                    ),
-                    -1,
+        if i < args.precrop_iters:
+            dH = int(H // 2 * args.precrop_frac)
+            dW = int(W // 2 * args.precrop_frac)
+            coords = torch.stack(
+                torch.meshgrid(
+                    torch.linspace(H // 2 - dH, H // 2 + dH - 1, 2 * dH),
+                    torch.linspace(W // 2 - dW, W // 2 + dW - 1, 2 * dW),
+                ),
+                -1,
+            )
+            if i == start:
+                print(
+                    f"[Config] Center cropping of size {2*dH} x {2*dW} is enabled until iter {args.precrop_iters}"
                 )
-                if i == start:
-                    print(
-                        f"[Config] Center cropping of size {2*dH} x {2*dW} is enabled until iter {args.precrop_iters}"
-                    )
-            else:
-                coords = torch.stack(
-                    torch.meshgrid(torch.linspace(0, H - 1, H), torch.linspace(0, W - 1, W)),
-                    -1,
-                )  # (H, W, 2)
+        else:
+            coords = torch.stack(
+                torch.meshgrid(torch.linspace(0, H - 1, H), torch.linspace(0, W - 1, W)),
+                -1,
+            )  # (H, W, 2)
 
-            coords = torch.reshape(coords, [-1, 2])  # (H * W, 2)
-            select_inds = np.random.choice(
-                coords.shape[0], size=[args.N_rand], replace=False
-            )  # (args.N_rand,)
-            select_coords = coords[select_inds].long()  # (args.N_rand, 2)
-            rays_o = rays_o[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
-            rays_d = rays_d[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
-            batch_rays = torch.stack([rays_o, rays_d], 0)
-            target_s = target[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
+        coords = torch.reshape(coords, [-1, 2])  # (H * W, 2)
+        select_inds = np.random.choice(
+            coords.shape[0], size=[args.N_rand], replace=False
+        )  # (args.N_rand,)
+        select_coords = coords[select_inds].long()  # (args.N_rand, 2)
+        rays_o = rays_o[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
+        rays_d = rays_d[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
+        batch_rays = torch.stack([rays_o, rays_d], 0)
+        target_s = target[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
+        mask_s = target_mask[select_coords[:, 0], select_coords[:, 1]]  # (args.N_rand, 3)
+        mask_s = mask_s[:, None]  # expand last dim
 
         #####  Core optimization loop  #####
         rgb, disp, acc, extras = Utils.render(
@@ -156,13 +158,13 @@ def train():
         )
 
         optimizer.zero_grad()
-        img_loss = Utils.img2mse(rgb, target_s)
+        img_loss = Utils.img2mse(rgb, target_s, mask_s)
         trans = extras["raw"][..., -1]
         loss = img_loss
         psnr = Utils.mse2psnr(img_loss)
 
         if "rgb0" in extras:
-            img_loss0 = Utils.img2mse(extras["rgb0"], target_s)
+            img_loss0 = Utils.img2mse(extras["rgb0"], target_s, mask_s)
             loss = loss + img_loss0
             psnr0 = Utils.mse2psnr(img_loss0)
 
@@ -272,5 +274,8 @@ def train():
 
 
 if __name__ == "__main__":
-    torch.set_default_tensor_type("torch.cuda.FloatTensor")
+    if torch.cuda.is_available():
+        torch.set_default_tensor_type("torch.cuda.FloatTensor")
+    else:
+        torch.set_default_tensor_type("torch.FloatTensor")
     train()

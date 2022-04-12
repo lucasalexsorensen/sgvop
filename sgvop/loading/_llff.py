@@ -1,5 +1,6 @@
 import os
 
+import cv2
 import imageio
 import numpy as np
 import torch
@@ -140,7 +141,13 @@ def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
     imgfiles = [
         os.path.join(imgdir, f)
         for f in sorted(os.listdir(imgdir))
-        if f.endswith("JPG") or f.endswith("jpg") or f.endswith("png")
+        if (not f.startswith("dynamic_mask_"))
+        and (f.endswith("JPG") or f.endswith("jpg") or f.endswith("png"))
+    ]
+    maskfiles = [
+        os.path.join(imgdir, f)
+        for f in sorted(os.listdir(imgdir))
+        if f.startswith("dynamic_mask_")
     ]
     if poses.shape[-1] != len(imgfiles):
         print("Mismatch between imgs {} and poses {} !!!!".format(len(imgfiles), poses.shape[-1]))
@@ -159,11 +166,17 @@ def _load_data(basedir, factor=None, width=None, height=None, load_imgs=True):
         else:
             return imageio.imread(f)
 
-    imgs = imgs = [imread(f)[..., :3] / 255.0 for f in imgfiles]
+    def maskread(f):
+        return cv2.imread(f, cv2.IMREAD_GRAYSCALE)
+
+    imgs = [imread(f)[..., :3] / 255.0 for f in imgfiles]
     imgs = np.stack(imgs, -1)
 
-    print("Loaded image data", imgs.shape, poses[:, -1, 0])
-    return poses, bds, imgs
+    masks = [maskread(f) / 255.0 for f in maskfiles]
+    masks = np.stack(masks, -1)
+
+    print("Loaded image data", imgs.shape, masks.shape, poses[:, -1, 0])
+    return poses, bds, imgs, masks
 
 
 def _normalize(x):
@@ -302,7 +315,7 @@ def load_llff_data(
     basedir, factor=8, recenter=True, bd_factor=0.75, spherify=False, path_zflat=False
 ):
 
-    poses, bds, imgs = _load_data(
+    poses, bds, imgs, masks = _load_data(
         basedir, factor=factor
     )  # factor=8 downsamples original imgs by 8x
     print("Loaded", basedir, bds.min(), bds.max())
@@ -311,6 +324,7 @@ def load_llff_data(
     poses = np.concatenate([poses[:, 1:2, :], -poses[:, 0:1, :], poses[:, 2:, :]], 1)
     poses = np.moveaxis(poses, -1, 0).astype(np.float32)
     imgs = np.moveaxis(imgs, -1, 0).astype(np.float32)
+    masks = np.moveaxis(masks, -1, 0).astype(np.float32)
     images = imgs
     bds = np.moveaxis(bds, -1, 0).astype(np.float32)
 
@@ -373,8 +387,10 @@ def load_llff_data(
     print("HOLDOUT view is", i_test)
 
     images = images.astype(np.float32)
+    masks = masks.astype(np.float32)
     poses = poses.astype(np.float32)
 
     bounding_box = _get_bbox3d_for_llff(poses[:, :3, :4], poses[0, :3, -1], near=0.0, far=1.0)
 
-    return images, poses, bds, render_poses, i_test, bounding_box
+
+    return images, masks, poses, bds, render_poses, i_test, bounding_box

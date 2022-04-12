@@ -10,7 +10,12 @@ from tqdm import tqdm
 
 
 class Utils:
-    img2mse = lambda x, y: torch.mean((x - y) ** 2)
+    @staticmethod
+    def img2mse(x, y, mask=None):
+        if mask is None:
+            return torch.mean((x - y) ** 2)
+        return torch.mean((mask * (x - y)) ** 2)
+
     mse2psnr = lambda x: -10.0 * torch.log(x) / torch.log(torch.Tensor([10.0]))
     to8b = lambda x: (255 * np.clip(x, 0, 1)).astype(np.uint8)
 
