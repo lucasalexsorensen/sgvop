@@ -4,6 +4,10 @@ Code for my master's thesis on Semantically Guided Volumetric Object Placement. 
 # Structure
 * _notebooks_
     * Main directory for notebooks. These basically all non-NeRF related code
+    * 2D optimization: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/2D_optimization.ipynb)
+    * 2D semantic: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/2D_semantic.ipynb)
+    * 3D semantic: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/3D_semantic.ipynb)
+
 * _report_
     * LaTeX files and output PDF for the final report
 * _images_
