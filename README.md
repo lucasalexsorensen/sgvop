@@ -7,7 +7,7 @@ Code for my master's thesis on Semantically Guided Volumetric Object Placement. 
     * 2D optimization: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/2D_optimization.ipynb)
     * 2D semantic: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/2D_semantic.ipynb) (use Colab Pro to avoid OOM)
     * 3D semantic: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/3D_semantic.ipynb) (use Colab Pro to avoid OOM)
-    * Geometry: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/geometry.ipynb)
+    * Geometry: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lucasalexsorensen/sgvop/blob/master/notebooks/Geometry.ipynb)
 
 * _notebooks/images_
     * The raw images that were used for the 2D experiments
