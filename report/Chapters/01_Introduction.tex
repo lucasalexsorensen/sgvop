@@ -1,0 +1,29 @@
+\chapter{Introduction}
+\label{chapter:introduction}
+\section{Background and motivation}
+% nerfs
+In recent years, there has been some remarkable advances in the field of differentiable volumetric rendering. This has made it possible to faithfully reconstruct complex 3D scenes in a photo-realistic manner. Specifically, a lot of work has been made based on Neural Radiance Fields\cite{nerf2020} (also called NeRFs). As such, many extensions of NeRFs have been made already. Quite a few of these extensions revolve around improving the speed and efficiency of NeRFs\cite{mueller2022}, but there are also extensions that deal with NeRF manipulation. In \cite{benaim2022}, they present a novel method for disentangling foreground objects from their background scenes, which allows for fine-grained control of how the 3D scenes are composed.
+
+% clip
+Meanwhile, in a different area of research, there has also been made remarkable strides. Namely, vision-language models have seen significant improvements with the advent of CLIP\cite{radford2021}. The concept of building models that connect text-image pairs has proven to be quite effective, and the models have been performing especially well on zero-shot image classification tasks, and play a significant role in modern text-conditional image generation models (e.g. \cite{ramesh2022}). 
+
+% why not both?
+The main idea of this project is to combine the aforementioned NeRF manipulation techniques with CLIP models in order to manipulate objects in 3D volumetric scenes using semantic prompts - to this end, the concept of semantically guided volumetric object placement is established. Given a guiding text prompt, the framework should determine how to perform the most appropriate NeRF manipulation. A concrete example could be to guide a NeRF manipulation to properly relocate a disentangled coffee cup given the text prompt "a mug on a table". This is a powerful concept which could be essential for many virtual reality applications.
+
+\section{Related work}
+\textbf{Control-NeRF}\cite{control-nerf}. By maintaining a discrete feature volume grid, this method is capable of editing and mixing NeRF scenes. Concretely, this is done by manipulating the feature volume grid. However, it can be difficult to perform very precise manipulations, and semantically guided manipulations are not supported.
+
+\textbf{CLIP-NeRF}\cite{clip-nerf}. This method works by using latent codes to independently represent shapes (geometry) and appearances (color). These latent codes are what drive the manipulation, and can be obtained from CLIP vectors (i.e. guided by either text or image). The technique is incapable of simply transforming objects in the context of scenes (e.g. moving and rotating the object). Also, the paper only presents results from synthetic datasets containing primitive cars and chairs (i.e. not full scenes),  
+
+\textbf{LaTeRF}\cite{laterf}. An object extraction method which uses both pixel annotations and semantic guidance in order to manipulate NeRF scenes. The rendering loss now incorporates the an "objectness" probability for the points in 3D space, which guides the object disentanglement. The objectness probabilities are determined using the aforementioned pixel-level annotations. Additionally, a CLIP loss term is added to assist in filling occluded parts of the scene after extraction using a provided textual prompt. The method mostly works for extracting objects, and does not appear to extend to object manipulation (i.e. scaling, rotating, translating).
+
+\section{Structure}
+The project is structured according to an "IMRaD" structure - i.e. Introduction, Methods, Results and Discussion (Conclusion).
+
+Introduction (chapter \ref{chapter:introduction}) seeks to briefly summarize the current state of research in the field(s), and consequently explain why the research is meaningful.
+
+Methods (chapter \ref{chapter:theory}) aims to succinctly present the most essential theory and specific methods that were used in the experiments of the project.
+
+Results (chapter \ref{chapter:results}) presents the findings of the project. Chiefly, this chapter is dedicated to presenting experiment results. Also, for brevity, at the end of each subchapter is a small summary of what was obtained in the results.
+
+Conclusion (chapter \ref{chapter:conclusion}) seeks to make sense of the obtained results, and also seeks to address the limitations of the study, and briefly proposes suggestions for future research.
